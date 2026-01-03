@@ -1,43 +1,49 @@
 from transformers import pipeline
 
-qa_pipeline = pipeline(
-    task="question-answering",
-    model="distilbert-base-cased-distilled-squad"
-)
-
-def get_answer(context, question):
+class QuestionAnsweringApp:
     """
-    This function takes context and question
-    and returns a clean formatted answer.
+    A simple Question Answering application
+    using a HuggingFace pre-trained model.
     """
 
-    
-    input_data = {
-        "context": context,
-        "question": question
-    }
+    def __init__(self):
+       
+        self.model = pipeline(
+            "question-answering",
+            model="distilbert-base-cased-distilled-squad"
+        )
 
-    
-    result = qa_pipeline(input_data)
+    def answer_question(self, context, question):
+        """
+        Takes context and question as input
+        and returns formatted output.
+        """
 
-   
-    answer = result["answer"]
+        if not context.strip() or not question.strip():
+            return "Context and Question cannot be empty."
 
-    
-    confidence = round(result["score"], 2)
+        # Pass input to the model
+        response = self.model({
+            "context": context,
+            "question": question
+        })
 
-    return f"Answer: {answer} (Confidence: {confidence})"
+        # Format output
+        answer = response["answer"]
+        score = round(response["score"] * 100, 2)
+
+        return f"\nAnswer: {answer}\nConfidence: {score}%"
 
 
+def main():
+    print("🔹 Question Answering App (HuggingFace)\n")
 
-if __name__ == "__main__":
-    context_text = """
-    Hugging Face is an AI company that develops tools for building 
-    applications using machine learning. It is well known for its 
-    Transformers library which provides pre-trained models for NLP tasks.
-    """
+    context = input("Enter Context:\n")
+    question = input("\nEnter Question:\n")
 
-    question_text = "What is Hugging Face known for?"
+    qa_app = QuestionAnsweringApp()
+    result = qa_app.answer_question(context, question)
 
-    output = get_answer(context_text, question_text)
-    print(output)
+    print("\nResult:")
+    print(result)
+
